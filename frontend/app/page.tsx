@@ -154,7 +154,7 @@ export default function Home() {
             
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-red-600 mb-4">2.4x</div>
+                <div className="text-5xl font-bold text-green-600 mb-4">2.4x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Black patients died more often (11.5 per 100,000) than White patients (4.8 per 100,000)
                 </p>
@@ -162,7 +162,7 @@ export default function Home() {
               </div>
 
               <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-red-600 mb-4">2x</div>
+                <div className="text-5xl font-bold text-green-600 mb-4">2x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Black infants were at twice the risk of being at a hospital with high rates of mortality and morbidity
                 </p>
@@ -170,7 +170,7 @@ export default function Home() {
               </div>
 
               <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-red-600 mb-4">10x</div>
+                <div className="text-5xl font-bold text-green-600 mb-4">10x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Black women were ten times more likely to report unfair treatment and discrimination from maternity care providers
                 </p>
