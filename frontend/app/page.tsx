@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+// Split text into words for animation
+const splitTextIntoWords = (text: string) => {
+  return text.split(' ');
+};
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,32 +26,48 @@ export default function Home() {
     <div className="min-h-screen">
       {/* Header */}
       <header 
-        className={`sticky top-0 z-50 transition-all duration-300 bg-gradient-to-b from-green-50 to-white ${
+        className={`sticky top-0 z-50 transition-all duration-300 bg-white ${
           isScrolled 
             ? 'border-b border-green-200 shadow-sm' 
             : 'border-b border-transparent'
         }`}
       >
-        {/* Decorative background grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#10b98112_1px,transparent_1px),linear-gradient(to_bottom,#10b98112_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Left Corner */}
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none"
+            >
               Care Equity
-            </h1>
-            <nav className="hidden md:flex gap-8">
-              <a href="#problem" className="text-gray-700 hover:text-green-600 transition-colors text-sm font-medium">
+            </button>
+            
+            {/* Navigation - Right Side */}
+            <nav className="hidden md:flex items-center gap-1">
+              <a 
+                href="#problem" 
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
                 The Problem
               </a>
-              <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors text-sm font-medium">
+              <a 
+                href="#features" 
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
                 Features
               </a>
-              <a href="#faq" className="text-gray-700 hover:text-green-600 transition-colors text-sm font-medium">
+              <a 
+                href="#faq" 
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
                 FAQ
               </a>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors">
+              <Link 
+                href="/quality-ratings"
+                className="ml-2 px-4 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-all duration-200 shadow-sm"
+              >
                 GET STARTED
-              </button>
+              </Link>
             </nav>
           </div>
         </div>
@@ -59,16 +82,63 @@ export default function Home() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 lg:py-40">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-6xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                What if You Could Choose
+                {/* Animated word-by-word text */}
+                <span className="inline-block">
+                  {splitTextIntoWords('What if You Could Choose').map((word, index) => (
+                    <span
+                      key={`line1-${index}`}
+                      className="inline-block mr-3 md:mr-4"
+                      style={{
+                        animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </span>
                 <br />
-                <span className="text-green-600">Safer Healthcare</span>
+                <span className="text-green-600 inline-block">
+                  {splitTextIntoWords('Safer Healthcare').map((word, index) => (
+                    <span
+                      key={`line2-${index}`}
+                      className="inline-block mr-3 md:mr-4"
+                      style={{
+                        animation: `fadeInUp 0.6s ease-out ${(splitTextIntoWords('What if You Could Choose').length * 0.1) + 0.3 + (index * 0.1)}s both`,
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </span>
                 <br />
-                for Everyone?
+                <span className="inline-block">
+                  {splitTextIntoWords('for Everyone?').map((word, index) => (
+                    <span
+                      key={`line3-${index}`}
+                      className="inline-block mr-3 md:mr-4"
+                      style={{
+                        animation: `fadeInUp 0.6s ease-out ${(splitTextIntoWords('What if You Could Choose').length * 0.1) + (splitTextIntoWords('Safer Healthcare').length * 0.1) + 0.6 + (index * 0.1)}s both`,
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p 
+                className="text-xl md:text-2xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed"
+                style={{
+                  animation: `fadeInFloat 0.8s ease-out 1.5s both`,
+                }}
+              >
                 Care Equity is a healthcare quality tracker — built to empower patients with transparent data, while keeping your information secure and anonymous.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div 
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+                style={{
+                  animation: `fadeInFloat 0.8s ease-out 1.8s both`,
+                }}
+              >
                 <button className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-lg">
                   GET STARTED
                 </button>
@@ -76,7 +146,12 @@ export default function Home() {
                   See how it works
                 </button>
               </div>
-              <p className="mt-6 text-sm text-gray-600">
+              <p 
+                className="mt-6 text-sm text-gray-600"
+                style={{
+                  animation: `fadeInFloat 0.8s ease-out 2.1s both`,
+                }}
+              >
                 Join patients and advocates working towards equitable healthcare
               </p>
             </div>
@@ -408,6 +483,31 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* CSS Animations for Hero Section */}
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInFloat {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
