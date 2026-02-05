@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Reem_Kufi } from "next/font/google";
 import "./globals.css";
+import ToasterComponent from "./components/Toaster";
 
 const reemKufi = Reem_Kufi({
   weight: ['400', '500', '600', '700'],
@@ -25,6 +26,7 @@ export default function RootLayout({
         style={{ fontFamily: reemKufi.style.fontFamily }}
       >
         {children}
+        <ToasterComponent />
       </body>
     </html>
   );
