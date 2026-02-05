@@ -40,6 +40,17 @@ connectDB().catch((error) => {
   console.error('Failed to connect to MongoDB:', error);
 });
 
+// Routes
+import hospitalOutcomesRouter from './routes/hospitalOutcomes';
+app.use('/api/hospital-outcomes', hospitalOutcomesRouter);
+
+import scoresRouter from './routes/scores';
+app.use('/api/scores', scoresRouter);
+
+import adminRouter from './routes/admin';
+app.use('/admin', adminRouter);
+
+// Basic route
 // ==================== ROUTES ====================
 
 /**
