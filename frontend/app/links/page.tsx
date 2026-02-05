@@ -80,9 +80,10 @@ export default function Statistics() {
             {/* Logo - Left Corner */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+              className="flex items-center gap-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0 hover:scale-105"
             >
-              Care Equity
+              <img src="/icon.png" alt="Care Equity" className="w-8 h-8" />
+              <span>Care Equity</span>
             </button>
             
             {/* Navigation - Right Side */}
@@ -239,12 +240,45 @@ export default function Statistics() {
       {/* Footer */}
       <footer className="bg-green-500 text-white py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-bold text-white mb-4">Care Equity</h3>
+              <p className="text-sm text-green-50">
+                Empowering patients with data-driven insights to address healthcare inequities
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Services</h4>
+              <ul className="space-y-2 text-sm text-green-50">
+                <li><Link href="/quality-ratings" className="hover:text-white transition-colors">Ratings</Link></li>
+                <li><Link href="/find-hospitals" className="hover:text-white transition-colors">Find Hospitals</Link></li>
+                <li><Link href="/links" className="hover:text-white transition-colors">Newsletters</Link></li>
+                <li><Link href="/report" className="hover:text-white transition-colors">Submit Anonymous Form</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm text-green-50">
+                <li><Link href="/#faq" className="hover:text-white transition-colors">FAQ</Link></li>
+                <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/#problem" className="hover:text-white transition-colors">The Problem</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Contact Us</h4>
+              <p className="text-sm text-green-50">
+                <a href="mailto:info@careequity.org" className="hover:text-white transition-colors">
+                  info@careequity.org
+                </a>
+              </p>
+            </div>
+          </div>
           <div className="border-t border-green-500 pt-8 text-center">
             <p className="text-sm text-green-50">
               © 2026 Care Equity. All rights reserved.
             </p>
             <p className="text-xs text-green-100 mt-2">
-              Code2040 Hackathon 2026 – Anonymous Healthcare Bias Tracker
+              Code 2040 Hackathon 2026. Team 15.
             </p>
           </div>
         </div>

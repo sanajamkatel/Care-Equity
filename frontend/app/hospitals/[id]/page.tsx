@@ -260,11 +260,13 @@ export default function HospitalDetail() {
       <header className="sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center justify-between h-16">
+            {/* Logo - Left Corner */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+              className="flex items-center gap-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0 hover:scale-105"
             >
-              Care Equity
+              <img src="/icon.png" alt="Care Equity" className="w-8 h-8" />
+              <span>Care Equity</span>
             </button>
             
             {/* Navigation - Right Side */}
@@ -564,6 +566,9 @@ export default function HospitalDetail() {
           <div className="border-t border-green-500 pt-8 text-center">
             <p className="text-sm text-green-50">
               © 2026 Care Equity. All rights reserved.
+            </p>
+            <p className="text-xs text-green-100 mt-2">
+              Code 2040 Hackathon 2026. Team 15.
             </p>
           </div>
         </div>
