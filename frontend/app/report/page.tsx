@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 /**
  * Hospital Interface
@@ -31,10 +32,10 @@ export default function ReportForm() {
   const [selectedHospital, setSelectedHospital] = useState<string>('');
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
+  const [race, setRace] = useState<string>('');
+  const [experienceType, setExperienceType] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<boolean>(false);
 
   /**
    * Fetch hospitals from backend API
@@ -49,11 +50,11 @@ export default function ReportForm() {
         if (result.success && result.data) {
           setHospitals(result.data);
         } else {
-          setError('Failed to load hospitals. Please try again later.');
+          toast.error('Failed to load hospitals. Please try again later.');
         }
       } catch (error) {
         console.error('Error fetching hospitals:', error);
-        setError('Failed to load hospitals. Please check your connection.');
+        toast.error('Failed to load hospitals. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -67,22 +68,30 @@ export default function ReportForm() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
 
     // Validation
     if (!selectedHospital) {
-      setError('Please select a hospital');
+      toast.error('Please select a hospital');
       return;
     }
 
     if (rating === 0) {
-      setError('Please provide a rating');
+      toast.error('Please provide a rating');
       return;
     }
 
     if (!comment.trim()) {
-      setError('Please provide a comment');
+      toast.error('Please provide a comment');
+      return;
+    }
+
+    if (!race) {
+      toast.error('Please select your race/ethnicity');
+      return;
+    }
+
+    if (!experienceType) {
+      toast.error('Please select the type of experience');
       return;
     }
 
@@ -98,28 +107,32 @@ export default function ReportForm() {
           hospitalId: selectedHospital,
           rating: rating,
           comment: comment.trim(),
+          race: race,
+          experienceType: experienceType,
         }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        setSuccess(true);
+        toast.success('Report submitted successfully! Thank you for sharing your experience.');
         // Reset form
         setSelectedHospital('');
         setRating(0);
         setComment('');
+        setRace('');
+        setExperienceType('');
         
         // Redirect after 2 seconds
         setTimeout(() => {
-          router.push('/quality-ratings');
+          router.push('/quality-ratings-copy');
         }, 2000);
       } else {
-        setError(result.message || 'Failed to submit report. Please try again.');
+        toast.error(result.message || 'Failed to submit report. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting report:', error);
-      setError('Failed to submit report. Please check your connection and try again.');
+      toast.error('Failed to submit report. Please check your connection and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -189,33 +202,6 @@ export default function ReportForm() {
         <section className="py-8 md:py-12 bg-white">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 md:p-10">
-              {/* Success Message */}
-              {success && (
-                <div className="mb-6 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-green-800 font-semibold">Report submitted successfully!</p>
-                      <p className="text-green-700 text-sm">Thank you for sharing your experience. Redirecting to ratings page...</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p className="text-red-800 font-semibold">{error}</p>
-                  </div>
-                </div>
-              )}
-
               {/* Privacy Notice */}
               <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-start gap-3">
@@ -306,6 +292,58 @@ export default function ReportForm() {
                   />
                   <p className="mt-2 text-xs text-gray-500">
                     {comment.length} / 5000 characters
+                  </p>
+                </div>
+
+                {/* Race/Ethnicity Selection */}
+                <div>
+                  <label htmlFor="race" className="block text-sm font-semibold text-gray-900 mb-2">
+                    Race/Ethnicity <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="race"
+                    value={race}
+                    onChange={(e) => setRace(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-green-200 rounded-lg focus:outline-none focus:border-green-500 text-gray-900 bg-white transition-all"
+                    required
+                    disabled={submitting}
+                  >
+                    <option value="">-- Select your race/ethnicity --</option>
+                    <option value="Black">Black or African American</option>
+                    <option value="White">White</option>
+                    <option value="Hispanic">Hispanic or Latino</option>
+                    <option value="Asian">Asian</option>
+                    <option value="Native American">Native American or Alaska Native</option>
+                    <option value="Pacific Islander">Native Hawaiian or Pacific Islander</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  <p className="mt-2 text-xs text-gray-500">
+                    This information is required to help us identify and address healthcare disparities. Your response is completely anonymous.
+                  </p>
+                </div>
+
+                {/* Experience Type Selection */}
+                <div>
+                  <label htmlFor="experienceType" className="block text-sm font-semibold text-gray-900 mb-2">
+                    Type of Experience <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="experienceType"
+                    value={experienceType}
+                    onChange={(e) => setExperienceType(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-green-200 rounded-lg focus:outline-none focus:border-green-500 text-gray-900 bg-white transition-all"
+                    required
+                    disabled={submitting}
+                  >
+                    <option value="">-- Select type of experience --</option>
+                    <option value="Compliment">Compliment - Positive experience</option>
+                    <option value="Complaint">Complaint - Negative experience</option>
+                    <option value="Suggestion">Suggestion - Ideas for improvement</option>
+                    <option value="General Feedback">General Feedback - Mixed or neutral experience</option>
+                  </select>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Help us categorize your feedback to better understand and address healthcare experiences.
                   </p>
                 </div>
 

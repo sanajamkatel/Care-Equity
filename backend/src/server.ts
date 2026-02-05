@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { connectDB, getDBStatus } from './config/database';
+import { connectDB } from './config/database';
 import { Hospital } from './models/Hospital';
 import { CalculatedRating } from './models/CalculatedRating';
 import { PatientReport } from './models/PatientReport';
@@ -33,12 +33,6 @@ app.use(express.json());
 // URL-encoded body parser - parses form data
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware (for debugging)
-// Logs every incoming request with timestamp, method, and path
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next(); // Pass control to next middleware/route
-});
 
 // ==================== DATABASE CONNECTION ====================
 // Connect to MongoDB Atlas (non-blocking - doesn't stop server if connection fails)
@@ -66,53 +60,6 @@ app.get('/health', (req, res) => {
 });
 
 /**
- * GET /db-status
- * Database status endpoint - used for debugging MongoDB connection
- * Returns MongoDB connection state and database info
- * 
- * Try: curl http://localhost:5001/db-status
- */
-app.get('/db-status', (req, res) => {
-  res.json({
-    status: 'OK',
-    db: getDBStatus(), // Returns connection state from database.ts
-    timestamp: new Date().toISOString(),
-  });
-});
-
-/**
- * GET /test-collections
- * 
- * Debug endpoint to check what collections exist and how many documents are in each
- */
-app.get('/test-collections', async (req, res) => {
-  try {
-    const db = mongoose.connection.db;
-    if (!db) {
-      return res.json({ error: 'Database not connected' });
-    }
-    
-    const collections = await db.listCollections().toArray();
-    const collectionInfo = await Promise.all(
-      collections.map(async (col) => {
-        const count = await db.collection(col.name).countDocuments();
-        return { name: col.name, count };
-      })
-    );
-    
-    res.json({
-      database: mongoose.connection.name,
-      collections: collectionInfo,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to list collections',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-/**
  * GET /ratings
  * 
  * Returns all hospitals with their calculated ratings joined together.
@@ -129,16 +76,9 @@ app.get('/ratings', async (req, res) => {
     // Step 1: Fetch all hospitals from MongoDB
     // .lean() returns plain JavaScript objects (faster, no Mongoose overhead)
     const hospitals = await Hospital.find({}).lean();
-    console.log(`[DEBUG] Found ${hospitals.length} hospitals in 'hospitals' collection`);
     
     // Step 2: Fetch all calculated ratings from MongoDB
     const ratings = await CalculatedRating.find({}).lean();
-    console.log(`[DEBUG] Found ${ratings.length} ratings in 'CalculatedRatings' collection`);
-    
-    // Debug: Log first rating to see structure
-    if (ratings.length > 0) {
-      console.log(`[DEBUG] Sample rating structure:`, JSON.stringify(ratings[0], null, 2));
-    }
     
     // Step 3: Create a Map for O(1) lookup performance
     // Maps hospitalId (e.g., "HOSP_001") to its rating object
@@ -228,19 +168,21 @@ app.get('/hospitals', async (req, res) => {
  * - hospitalId: string (required) - ID of the hospital being reviewed
  * - rating: number (required) - Rating from 1-5 (1 = poor, 5 = excellent)
  * - comment: string (required) - Written review/comment (max 5000 chars)
+ * - race: string (required) - Patient's race/ethnicity
+ * - experienceType: string (required) - Type of experience: 'Compliment', 'Complaint', 'Suggestion', 'General Feedback'
  * 
  * Returns the created report with a success message.
  */
 app.post('/reports', async (req, res) => {
   try {
-    const { hospitalId, rating, comment } = req.body;
+    const { hospitalId, rating, comment, race, experienceType } = req.body;
     
     // Validate required fields
-    if (!hospitalId || !rating || !comment) {
+    if (!hospitalId || !rating || !comment || !race || !experienceType) {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields',
-        message: 'hospitalId, rating, and comment are required',
+        message: 'hospitalId, rating, comment, race, and experienceType are required',
       });
     }
     
@@ -262,6 +204,26 @@ app.post('/reports', async (req, res) => {
       });
     }
     
+    // Validate race
+    const validRaces = ['Black', 'White', 'Hispanic', 'Asian', 'Native American', 'Pacific Islander', 'Other', 'Prefer not to say'];
+    if (!validRaces.includes(race)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid race/ethnicity',
+        message: `Race must be one of: ${validRaces.join(', ')}`,
+      });
+    }
+    
+    // Validate experienceType
+    const validExperienceTypes = ['Compliment', 'Complaint', 'Suggestion', 'General Feedback'];
+    if (!validExperienceTypes.includes(experienceType)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid experience type',
+        message: `Experience type must be one of: ${validExperienceTypes.join(', ')}`,
+      });
+    }
+    
     // Validate hospital exists
     const hospital = await Hospital.findById(hospitalId);
     if (!hospital) {
@@ -277,6 +239,8 @@ app.post('/reports', async (req, res) => {
       hospitalId,
       rating,
       comment: comment.trim(),
+      race: race,
+      experienceType: experienceType,
       isAnonymous: true,
     });
     
@@ -538,67 +502,6 @@ app.post('/articles', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to create article',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-/**
- * POST /articles/seed
- * 
- * Seeds the database with initial articles if the collection is empty.
- * This is a one-time operation to populate initial data.
- */
-app.post('/articles/seed', async (req, res) => {
-  try {
-    // Check if articles already exist
-    const existingCount = await Article.countDocuments();
-    if (existingCount > 0) {
-      return res.json({
-        success: true,
-        message: 'Articles already exist in database',
-        count: existingCount,
-      });
-    }
-    
-    // Initial articles to seed
-    const initialArticles = [
-      {
-        title: 'Maternal Mortality Rates by Race and Ethnicity',
-        description: 'Data analysis showing that Black women are three times more likely to die from pregnancy-related causes than White women, highlighting systemic healthcare inequities.',
-        url: 'https://www.cdc.gov/nchs/data/hestat/maternal-mortality/2021/maternal-mortality-rates-2021.htm',
-        source: 'CDC National Center for Health Statistics',
-        date: '2021',
-      },
-      {
-        title: 'Healthcare Access and Quality Disparities',
-        description: 'Report on how geographic location, socioeconomic status, and race impact access to quality healthcare services and health outcomes.',
-        url: 'https://www.ahrq.gov/research/findings/nhqrdr/index.html',
-        source: 'Agency for Healthcare Research and Quality',
-        date: '2022',
-      },
-      {
-        title: 'Healthcare Provider Bias and Patient Outcomes',
-        description: 'Research on how healthcare provider biases, both explicit and implicit, affect treatment decisions and patient outcomes across different demographic groups.',
-        url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4843483/',
-        source: 'Journal of General Internal Medicine',
-        date: '2016',
-      },
-    ];
-    
-    // Insert articles
-    const insertedArticles = await Article.insertMany(initialArticles);
-    
-    res.status(201).json({
-      success: true,
-      message: `Successfully seeded ${insertedArticles.length} articles`,
-      count: insertedArticles.length,
-    });
-  } catch (error) {
-    console.error('Error seeding articles:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to seed articles',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
