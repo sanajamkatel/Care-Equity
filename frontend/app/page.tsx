@@ -25,48 +25,42 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header 
-        className={`sticky top-0 z-50 transition-all duration-300 bg-white ${
-          isScrolled 
-            ? 'border-b border-green-200 shadow-sm' 
-            : 'border-b border-transparent'
-        }`}
-      >
+      <header className="sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo - Left Corner */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none"
+              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
             >
               Care Equity
             </button>
             
             {/* Navigation - Right Side */}
             <nav className="hidden md:flex items-center gap-1">
-              <a 
-                href="#problem" 
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
-              >
-                The Problem
-              </a>
-              <a 
-                href="#features" 
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
-              >
-                Features
-              </a>
-              <a 
-                href="#faq" 
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
-              >
-                FAQ
-              </a>
               <Link 
-                href="/quality-ratings"
+                href="/"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Home
+              </Link>
+              <Link 
+                href="/quality-ratings-copy"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Ratings
+              </Link>
+              <Link 
+                href="/links"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Newsletters
+              </Link>
+              <Link 
+                href="/report"
                 className="ml-2 px-4 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-all duration-200 shadow-sm"
               >
-                GET STARTED
+                Submit Anonymous Form
               </Link>
             </nav>
           </div>
@@ -139,12 +133,18 @@ export default function Home() {
                   animation: `fadeInFloat 0.8s ease-out 1.8s both`,
                 }}
               >
-                <button className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-lg">
-                  GET STARTED
-                </button>
-                <button className="px-8 py-4 border-2 border-green-600 text-green-600 rounded-lg font-semibold text-lg hover:bg-green-50 transition-all">
-                  See how it works
-                </button>
+                <Link 
+                  href="/quality-ratings-copy"
+                  className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-lg text-center"
+                >
+                  Check ratings for a hospital
+                </Link>
+                <Link 
+                  href="/report"
+                  className="px-8 py-4 border-2 border-green-600 text-green-600 rounded-lg font-semibold text-lg hover:bg-green-50 transition-all text-center"
+                >
+                  Submit Anonymous
+                </Link>
               </div>
               <p 
                 className="mt-6 text-sm text-gray-600"

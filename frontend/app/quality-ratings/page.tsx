@@ -331,6 +331,12 @@ export default function QualityRatings() {
                 FAQ
               </Link>
               <Link 
+                href="/report"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200 border border-gray-300 hover:border-green-300"
+              >
+                Submit Anonymous Issue
+              </Link>
+              <Link 
                 href="/"
                 className="ml-2 px-4 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-all duration-200 shadow-sm"
               >
@@ -856,7 +862,7 @@ export default function QualityRatings() {
                 * Ratings are based on aggregated patient reports and health outcome data
               </p>
               <Link
-                href="/"
+                href="/report"
                 className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
               >
                 Report Your Experience
@@ -934,7 +940,7 @@ export default function QualityRatings() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/"
+                href="/report"
                 className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-lg"
               >
                 Submit Anonymous Report

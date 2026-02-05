@@ -1,0 +1,404 @@
+'use client';
+
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+/**
+ * Hospital Interface
+ * 
+ * Represents a hospital option for the dropdown
+ */
+interface Hospital {
+  id: string;
+  name: string;
+  location: string;
+}
+
+/**
+ * Report Form Component
+ * 
+ * Anonymous report form that allows users to:
+ * - Select a hospital
+ * - Provide a rating (1-5)
+ * - Submit a written comment/review
+ */
+export default function ReportForm() {
+  const router = useRouter();
+  
+  // State management
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [selectedHospital, setSelectedHospital] = useState<string>('');
+  const [rating, setRating] = useState<number>(0);
+  const [comment, setComment] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<boolean>(false);
+
+  /**
+   * Fetch hospitals from backend API
+   */
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:5001/hospitals');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setHospitals(result.data);
+        } else {
+          setError('Failed to load hospitals. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error fetching hospitals:', error);
+        setError('Failed to load hospitals. Please check your connection.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHospitals();
+  }, []);
+
+  /**
+   * Handle form submission
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess(false);
+
+    // Validation
+    if (!selectedHospital) {
+      setError('Please select a hospital');
+      return;
+    }
+
+    if (rating === 0) {
+      setError('Please provide a rating');
+      return;
+    }
+
+    if (!comment.trim()) {
+      setError('Please provide a comment');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      
+      const response = await fetch('http://localhost:5001/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hospitalId: selectedHospital,
+          rating: rating,
+          comment: comment.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccess(true);
+        // Reset form
+        setSelectedHospital('');
+        setRating(0);
+        setComment('');
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          router.push('/quality-ratings');
+        }, 2000);
+      } else {
+        setError(result.message || 'Failed to submit report. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      setError('Failed to submit report. Please check your connection and try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Left Corner */}
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
+              Care Equity
+            </button>
+            
+            {/* Navigation - Right Side */}
+            <nav className="hidden md:flex items-center gap-1">
+              <Link 
+                href="/"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Home
+              </Link>
+              <Link 
+                href="/quality-ratings-copy"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Ratings
+              </Link>
+              <Link 
+                href="/links"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md text-base font-medium transition-all duration-200"
+              >
+                Newsletters
+              </Link>
+              <Link 
+                href="/report"
+                className="ml-2 px-4 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-all duration-200 shadow-sm"
+              >
+                Submit Anonymous Form
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-green-50 to-white pt-16 md:pt-24 pb-8 md:pb-12">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                Report Your Experience
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-700 mb-8">
+                Your anonymous report helps improve healthcare transparency and equity
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Form Section */}
+        <section className="py-8 md:py-12 bg-white">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 md:p-10">
+              {/* Success Message */}
+              {success && (
+                <div className="mb-6 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p className="text-green-800 font-semibold">Report submitted successfully!</p>
+                      <p className="text-green-700 text-sm">Thank you for sharing your experience. Redirecting to ratings page...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-red-800 font-semibold">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Privacy Notice */}
+              <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-blue-900 font-semibold text-sm mb-1">Your Privacy Matters</p>
+                    <p className="text-blue-800 text-sm">
+                      All reports are submitted anonymously. We do not collect any personal information that could identify you.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Hospital Selection */}
+                <div>
+                  <label htmlFor="hospital" className="block text-sm font-semibold text-gray-900 mb-2">
+                    Select Hospital <span className="text-red-500">*</span>
+                  </label>
+                  {loading ? (
+                    <div className="px-4 py-3 border-2 border-green-200 rounded-lg bg-gray-50">
+                      <p className="text-gray-500 text-sm">Loading hospitals...</p>
+                    </div>
+                  ) : (
+                    <select
+                      id="hospital"
+                      value={selectedHospital}
+                      onChange={(e) => setSelectedHospital(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-green-200 rounded-lg focus:outline-none focus:border-green-500 text-gray-900 bg-white transition-all"
+                      required
+                      disabled={submitting}
+                    >
+                      <option value="">-- Select a hospital --</option>
+                      {hospitals.map((hospital) => (
+                        <option key={hospital.id} value={hospital.id}>
+                          {hospital.name} - {hospital.location}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {/* Rating Selection */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Your Rating <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setRating(value)}
+                        disabled={submitting}
+                        className={`flex-1 py-4 px-4 rounded-lg font-semibold text-lg transition-all ${
+                          rating === value
+                            ? 'bg-green-600 text-white shadow-lg scale-105'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        } ${submitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        {value}
+                        <span className="block text-xs mt-1">
+                          {value === 1 ? 'Poor' : value === 2 ? 'Fair' : value === 3 ? 'Good' : value === 4 ? 'Very Good' : 'Excellent'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" value={rating} required />
+                </div>
+
+                {/* Comment/Review */}
+                <div>
+                  <label htmlFor="comment" className="block text-sm font-semibold text-gray-900 mb-2">
+                    Your Review/Comment <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    rows={6}
+                    className="w-full px-4 py-3 border-2 border-green-200 rounded-lg focus:outline-none focus:border-green-500 text-gray-900 bg-white transition-all resize-y"
+                    placeholder="Share your experience at this hospital. Your feedback helps others make informed decisions..."
+                    required
+                    disabled={submitting}
+                    maxLength={5000}
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    {comment.length} / 5000 characters
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <button
+                    type="submit"
+                    disabled={submitting || loading}
+                    className="flex-1 px-6 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  >
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : (
+                      'Submit Anonymous Report'
+                    )}
+                  </button>
+                  <Link
+                    href="/quality-ratings"
+                    className="px-6 py-4 border-2 border-green-600 text-green-600 rounded-lg font-semibold text-lg hover:bg-green-50 transition-all text-center"
+                  >
+                    Cancel
+                  </Link>
+                </div>
+              </form>
+            </div>
+
+            {/* Additional Info */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-600 mb-4">
+                Your report will be used to calculate hospital ratings and identify healthcare disparities
+              </p>
+              <Link
+                href="/quality-ratings"
+                className="text-green-600 hover:text-green-700 font-medium text-sm underline"
+              >
+                View Hospital Quality Ratings →
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-green-500 text-white py-12 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-bold text-white mb-4">Care Equity</h3>
+              <p className="text-sm text-green-50">
+                Empowering patients with data-driven insights to address healthcare inequities
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Services</h4>
+              <ul className="space-y-2 text-sm text-green-50">
+                <li><Link href="/" className="hover:text-white transition-colors">Hospital Finder</Link></li>
+                <li><Link href="/report" className="hover:text-white transition-colors">Anonymous Reporting</Link></li>
+                <li><Link href="/quality-ratings" className="hover:text-white transition-colors">Quality Ratings</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm text-green-50">
+                <li><Link href="/#faq" className="hover:text-white transition-colors">FAQ</Link></li>
+                <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/#problem" className="hover:text-white transition-colors">The Problem</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Contact Us</h4>
+              <p className="text-sm text-green-50">
+                <a href="mailto:info@careequity.org" className="hover:text-white transition-colors">
+                  info@careequity.org
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-green-500 pt-8 text-center">
+            <p className="text-sm text-green-50">
+              © 2026 Care Equity. All rights reserved.
+            </p>
+            <p className="text-xs text-green-100 mt-2">
+              Code2040 Hackathon 2026 – Anonymous Healthcare Bias Tracker
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
