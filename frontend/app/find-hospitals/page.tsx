@@ -75,15 +75,16 @@ export default function FindHospitals() {
       <header className="sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Logo - Left Corner */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+              className="flex items-center gap-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0 hover:scale-105"
             >
-              Care Equity
+              <img src="/icon.png" alt="Care Equity" className="w-8 h-8" />
+              <span>Care Equity</span>
             </button>
             
-            {/* Navigation */}
+            {/* Navigation - Right Side */}
             <nav className="hidden md:flex items-center gap-1">
               <Link 
                 href="/"
@@ -275,8 +276,10 @@ export default function FindHospitals() {
             <div>
               <h4 className="text-sm font-semibold text-white mb-4">Services</h4>
               <ul className="space-y-2 text-sm text-green-50">
-                <li><Link href="/find-hospitals" className="hover:text-white transition-colors">Hospital Finder</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">Anonymous Reporting</Link></li>
+                <li><Link href="/quality-ratings" className="hover:text-white transition-colors">Ratings</Link></li>
+                <li><Link href="/find-hospitals" className="hover:text-white transition-colors">Find Hospitals</Link></li>
+                <li><Link href="/links" className="hover:text-white transition-colors">Newsletters</Link></li>
+                <li><Link href="/report" className="hover:text-white transition-colors">Submit Anonymous Form</Link></li>
               </ul>
             </div>
             <div>
@@ -301,7 +304,7 @@ export default function FindHospitals() {
               © 2026 Care Equity. All rights reserved.
             </p>
             <p className="text-xs text-green-100 mt-2">
-              Code2040 Hackathon 2026 – Anonymous Healthcare Bias Tracker
+              Code 2040 Hackathon 2026. Team 15.
             </p>
           </div>
         </div>

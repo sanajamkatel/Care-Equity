@@ -11,6 +11,7 @@ const splitTextIntoWords = (text: string) => {
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
@@ -22,18 +23,42 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => new Set(prev).add(entry.target.id));
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const sections = document.querySelectorAll('[data-animate-section]');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm">
+      <header className={`sticky top-0 z-50 bg-white border-b border-green-200 shadow-sm transition-all duration-300 ${
+        isScrolled ? 'shadow-md' : 'shadow-sm'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo - Left Corner */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-2xl font-bold text-green-600 hover:text-green-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+              className="flex items-center gap-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-all duration-300 cursor-pointer bg-transparent border-none p-0 hover:scale-105"
             >
-              Care Equity
+              <img src="/icon.png" alt="Care Equity" className="w-8 h-8" />
+              <span>Care Equity</span>
             </button>
             
             {/* Navigation - Right Side */}
@@ -81,43 +106,15 @@ export default function Home() {
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 lg:py-40">
             <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-6xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 {/* Animated word-by-word text */}
                 <span className="inline-block">
-                  {splitTextIntoWords('What if You Could Choose').map((word, index) => (
+                  {splitTextIntoWords("What if healthcare quality didn't depend on race, gender, or location?").map((word, index) => (
                     <span
-                      key={`line1-${index}`}
-                      className="inline-block mr-3 md:mr-4"
+                      key={`hero-${index}`}
+                      className="inline-block mr-2 md:mr-3"
                       style={{
-                        animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
-                      }}
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </span>
-                <br />
-                <span className="text-green-600 inline-block">
-                  {splitTextIntoWords('Safer Healthcare').map((word, index) => (
-                    <span
-                      key={`line2-${index}`}
-                      className="inline-block mr-3 md:mr-4"
-                      style={{
-                        animation: `fadeInUp 0.6s ease-out ${(splitTextIntoWords('What if You Could Choose').length * 0.1) + 0.3 + (index * 0.1)}s both`,
-                      }}
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </span>
-                <br />
-                <span className="inline-block">
-                  {splitTextIntoWords('for Everyone?').map((word, index) => (
-                    <span
-                      key={`line3-${index}`}
-                      className="inline-block mr-3 md:mr-4"
-                      style={{
-                        animation: `fadeInUp 0.6s ease-out ${(splitTextIntoWords('What if You Could Choose').length * 0.1) + (splitTextIntoWords('Safer Healthcare').length * 0.1) + 0.6 + (index * 0.1)}s both`,
+                        animation: `fadeInUp 0.6s ease-out ${index * 0.08}s both`,
                       }}
                     >
                       {word}
@@ -126,12 +123,12 @@ export default function Home() {
                 </span>
               </h1>
               <p 
-                className="text-xl md:text-2xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed"
+                className="text-lg md:text-xl text-gray-700 mb-10 max-w-3xl mx-auto leading-loose"
                 style={{
-                  animation: `fadeInFloat 0.8s ease-out 1.5s both`,
+                  animation: `fadeInFloat 0.8s ease-out 1.2s both`,
                 }}
               >
-                Care Equity is a healthcare quality tracker — built to empower patients with transparent data, while keeping your information secure and anonymous.
+                Care Equity makes healthcare inequities visible—combining anonymous patient reports and maternal health outcomes to highlight disparities affecting Black patients and other communities of color.
               </p>
               <div 
                 className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -165,7 +162,13 @@ export default function Home() {
         </section>
 
         {/* Why You'll Love It Section */}
-        <section className="py-20 md:py-32 bg-white">
+        <section 
+          id="why-love-it"
+          data-animate-section
+          className={`py-20 md:py-32 bg-white transition-all duration-1000 ${
+            visibleSections.has('why-love-it') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -177,8 +180,13 @@ export default function Home() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div 
+                className={`text-center transform transition-all duration-700 hover:scale-105 hover:-translate-y-2 ${
+                  visibleSections.has('why-love-it') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('why-love-it') ? '0.1s' : '0s' }}
+              >
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 hover:bg-green-200 transition-colors duration-300 hover:rotate-6">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
@@ -191,8 +199,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div 
+                className={`text-center transform transition-all duration-700 hover:scale-105 hover:-translate-y-2 ${
+                  visibleSections.has('why-love-it') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('why-love-it') ? '0.3s' : '0s' }}
+              >
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 hover:bg-green-200 transition-colors duration-300 hover:rotate-6">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -205,8 +218,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div 
+                className={`text-center transform transition-all duration-700 hover:scale-105 hover:-translate-y-2 ${
+                  visibleSections.has('why-love-it') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('why-love-it') ? '0.5s' : '0s' }}
+              >
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 hover:bg-green-200 transition-colors duration-300 hover:rotate-6">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
@@ -223,7 +241,13 @@ export default function Home() {
         </section>
 
         {/* The Problem Section */}
-        <section id="problem" className="py-20 md:py-32 bg-green-50">
+        <section 
+          id="problem" 
+          data-animate-section
+          className={`py-20 md:py-32 bg-green-50 transition-all duration-1000 ${
+            visibleSections.has('problem') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -235,33 +259,59 @@ export default function Home() {
             </div>
             
             <div className="grid md:grid-cols-3 gap-8 mb-12">
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-green-600 mb-4">2.4x</div>
+              <div 
+                className={`bg-white p-8 rounded-xl shadow-sm border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:border-green-300 ${
+                  visibleSections.has('problem') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('problem') ? '0.1s' : '0s' }}
+              >
+                <div className="text-5xl font-bold text-green-600 mb-4 animate-pulse-once">3.5x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
-                  Black patients died more often (11.5 per 100,000) than White patients (4.8 per 100,000)
+                  Non-Hispanic Black women are more than 3 times more likely to have a maternal death than white women in the United States
                 </p>
-                <p className="text-sm text-gray-600">Source: KFF</p>
+                <p className="text-sm text-gray-600">
+                  Source: <a href="https://www.cdc.gov/nchs/data/hestat/maternal-mortality/2023/maternal-mortality-rates-2023.htm" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">CDC</a>
+                </p>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-green-600 mb-4">2x</div>
+              <div 
+                className={`bg-white p-8 rounded-xl shadow-sm border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:border-green-300 ${
+                  visibleSections.has('problem') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('problem') ? '0.3s' : '0s' }}
+              >
+                <div className="text-5xl font-bold text-green-600 mb-4 animate-pulse-once">2x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Black infants were at twice the risk of being at a hospital with high rates of mortality and morbidity
                 </p>
-                <p className="text-sm text-gray-600">Source: Harvard Online</p>
+                <p className="text-sm text-gray-600">
+                  Sources: <a href="https://www.ajmc.com/view/racial-disparities-persist-in-maternal-morbidity-mortality-and-infant-health" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">AJMC</a>, <a href="https://news.harvard.edu/gazette/story/2025/04/mortality-rates-between-black-white-americans-narrow-except-in-case-of-infants/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">Harvard Online</a>
+                </p>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
-                <div className="text-5xl font-bold text-green-600 mb-4">10x</div>
+              <div 
+                className={`bg-white p-8 rounded-xl shadow-sm border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:border-green-300 ${
+                  visibleSections.has('problem') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('problem') ? '0.5s' : '0s' }}
+              >
+                <div className="text-5xl font-bold text-green-600 mb-4 animate-pulse-once">10x</div>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Black women were ten times more likely to report unfair treatment and discrimination from maternity care providers
                 </p>
-                <p className="text-sm text-gray-600">Source: The Century Foundation</p>
+                <p className="text-sm text-gray-600">
+                  Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9914526/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">PMC</a>
+                </p>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
+              <div 
+                className={`bg-white p-8 rounded-xl shadow-sm border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:border-green-300 ${
+                  visibleSections.has('problem') ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('problem') ? '0.7s' : '0s' }}
+              >
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
                   Hospital Distribution Disparities
                 </h3>
@@ -271,10 +321,17 @@ export default function Home() {
                 <p className="text-gray-700 leading-relaxed">
                   Some hospitals serving Black mothers received 'F' ratings from quality groups
                 </p>
-                <p className="text-sm text-gray-600 mt-4">Source: Health Affairs</p>
+                <p className="text-sm text-gray-600 mt-4">
+                  Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7384760/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">PMC</a>, <a href="https://tcf.org/content/commentary/addressing-the-rural-maternal-health-crisis-with-the-black-maternal-health-momnibus/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">TCF</a>
+                </p>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100">
+              <div 
+                className={`bg-white p-8 rounded-xl shadow-sm border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:border-green-300 ${
+                  visibleSections.has('problem') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('problem') ? '0.9s' : '0s' }}
+              >
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
                   Patient Experience of Discrimination
                 </h3>
@@ -284,14 +341,22 @@ export default function Home() {
                 <p className="text-gray-700 leading-relaxed">
                   Patients who perceived racial bias were less likely to follow medical advice or seek care
                 </p>
-                <p className="text-sm text-gray-600 mt-4">Source: The Century Foundation</p>
+                <p className="text-sm text-gray-600 mt-4">
+                  Sources: <a href="https://tcf.org/content/commentary/maternal-health-care-for-all-must-be-made-a-reality/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">TCF</a>, <a href="https://www.cbcfinc.org/capstones/health-equity/healing-hands-amplifying-black-healthcare-providers-impact-on-americas-maternal-mortality-crisis/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 underline">CBCF</a>
+                </p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Advanced Features Section */}
-        <section id="features" className="py-20 md:py-32 bg-white">
+        <section 
+          id="features" 
+          data-animate-section
+          className={`py-20 md:py-32 bg-white transition-all duration-1000 ${
+            visibleSections.has('features') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -303,8 +368,13 @@ export default function Home() {
             </div>
             
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-              <div className="bg-green-50 p-8 rounded-xl border border-green-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+              <div 
+                className={`bg-green-50 p-8 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:bg-green-100 hover:border-green-300 ${
+                  visibleSections.has('features') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('features') ? '0.1s' : '0s' }}
+              >
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 hover:rotate-12 transition-transform duration-300">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -317,8 +387,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-green-50 p-8 rounded-xl border border-green-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+              <div 
+                className={`bg-green-50 p-8 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:bg-green-100 hover:border-green-300 ${
+                  visibleSections.has('features') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('features') ? '0.3s' : '0s' }}
+              >
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 hover:rotate-12 transition-transform duration-300">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -331,8 +406,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-green-50 p-8 rounded-xl border border-green-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+              <div 
+                className={`bg-green-50 p-8 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:bg-green-100 hover:border-green-300 ${
+                  visibleSections.has('features') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('features') ? '0.5s' : '0s' }}
+              >
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 hover:rotate-12 transition-transform duration-300">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -346,8 +426,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-green-50 p-8 rounded-xl border border-green-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+              <div 
+                className={`bg-green-50 p-8 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-105 hover:shadow-lg hover:bg-green-100 hover:border-green-300 ${
+                  visibleSections.has('features') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('features') ? '0.7s' : '0s' }}
+              >
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 hover:rotate-12 transition-transform duration-300">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -364,7 +449,13 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-20 md:py-32 bg-green-50">
+        <section 
+          id="faq" 
+          data-animate-section
+          className={`py-20 md:py-32 bg-green-50 transition-all duration-1000 ${
+            visibleSections.has('faq') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -376,47 +467,68 @@ export default function Home() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white p-6 rounded-xl border border-green-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div 
+                className={`bg-white p-6 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-lg ${
+                  visibleSections.has('faq') ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('faq') ? '0.1s' : '0s' }}
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   What is Care Equity, and why should I use it?
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Care Equity is a healthcare quality tracker that empowers patients with transparent, data-driven information about hospital quality and patient experiences. By using Care Equity, you can make informed healthcare decisions, report experiences anonymously, and help create a more equitable healthcare system.
+                <p className="text-gray-700 leading-loose">
+                  Care Equity is a healthcare quality tracker focused on identifying and exposing inequities in hospital care, especially those affecting people of color and marginalized communities. It provides transparent, data-driven insights into hospital quality, patient experiences, and disparities in outcomes—so patients can make informed decisions and advocate for safer, fairer care.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-green-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div 
+                className={`bg-white p-6 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-lg ${
+                  visibleSections.has('faq') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('faq') ? '0.3s' : '0s' }}
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   Who is Care Equity for?
                 </h3>
-                <div className="text-gray-700 leading-relaxed">
-                  <p className="mb-2">
-                    Care Equity is designed for anyone seeking healthcare, including:
+                <div className="text-gray-700 leading-loose">
+                  <p className="mb-3">
+                    Care Equity is designed for anyone navigating the healthcare system, especially:
                   </p>
-                  <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700">
-                    <li>Patients looking for safer hospitals and quality care</li>
+                  <ul className="list-disc list-inside mt-3 space-y-2 text-gray-700 leading-loose">
+                    <li>Patients seeking safer, more equitable hospital care</li>
+                    <li>Black women and people of color, who are disproportionately affected by healthcare bias</li>
                     <li>Pregnant individuals choosing where to give birth</li>
-                    <li>Advocates working to address healthcare inequities</li>
-                    <li>Anyone who has experienced bias or discrimination in healthcare</li>
+                    <li>Advocates and researchers working to address healthcare inequities</li>
+                    <li>Anyone who has experienced bias, discrimination, or unequal treatment in healthcare</li>
                   </ul>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-green-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div 
+                className={`bg-white p-6 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-lg ${
+                  visibleSections.has('faq') ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('faq') ? '0.5s' : '0s' }}
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   How does Care Equity ensure my privacy?
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  All reports are completely anonymous. We never collect personally identifiable information, and your reports cannot be traced back to you. Your privacy and security are our top priorities.
+                <p className="text-gray-700 leading-loose">
+                  All reports are completely anonymous. We do not collect personally identifiable information, and submissions cannot be traced back to individuals. Our goal is to surface systemic patterns—not expose personal identities.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-green-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div 
+                className={`bg-white p-6 rounded-xl border border-green-100 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-lg ${
+                  visibleSections.has('faq') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+                }`}
+                style={{ transitionDelay: visibleSections.has('faq') ? '0.7s' : '0s' }}
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   How are hospital ratings calculated?
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Hospital ratings are based on aggregated patient experiences, reported outcomes, and demographic-specific health data. We analyze patterns across multiple data points to provide transparent, reliable ratings.
+                <p className="text-gray-700 leading-loose">
+                  Hospital ratings are calculated using aggregated patient reports, health outcomes, and demographic-specific data. By analyzing patterns across race, ethnicity, and other factors, Care Equity highlights disparities that are often hidden in traditional hospital ratings.
                 </p>
               </div>
             </div>
@@ -424,7 +536,13 @@ export default function Home() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="py-20 md:py-32 bg-white">
+        <section 
+          data-animate-section
+          className={`py-20 md:py-32 bg-white transition-all duration-1000 ${
+            visibleSections.has('cta') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+          id="cta"
+        >
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               You've Scrolled Enough. Time to Act.
@@ -433,10 +551,13 @@ export default function Home() {
               Start making informed healthcare decisions with the platform built for patients like you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-lg">
+              <Link 
+                href="/quality-ratings"
+                className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-all hover:scale-110 hover:shadow-xl shadow-lg transform"
+              >
                 GET STARTED
-              </button>
-              <button className="px-8 py-4 border-2 border-green-600 text-green-600 rounded-lg font-semibold text-lg hover:bg-green-50 transition-all">
+              </Link>
+              <button className="px-8 py-4 border-2 border-green-600 text-green-600 rounded-lg font-semibold text-lg hover:bg-green-50 transition-all hover:scale-110 hover:border-green-700 hover:text-green-700 transform">
                 CONTACT US
               </button>
             </div>
@@ -457,8 +578,10 @@ export default function Home() {
             <div>
               <h4 className="text-sm font-semibold text-white mb-4">Services</h4>
               <ul className="space-y-2 text-sm text-green-50">
-                <li><Link href="/" className="hover:text-white transition-colors">Hospital Finder</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">Anonymous Reporting</Link></li>
+                <li><Link href="/quality-ratings" className="hover:text-white transition-colors">Ratings</Link></li>
+                <li><Link href="/find-hospitals" className="hover:text-white transition-colors">Find Hospitals</Link></li>
+                <li><Link href="/links" className="hover:text-white transition-colors">Newsletters</Link></li>
+                <li><Link href="/report" className="hover:text-white transition-colors">Submit Anonymous Form</Link></li>
               </ul>
             </div>
             <div>
@@ -483,7 +606,7 @@ export default function Home() {
               © 2026 Care Equity. All rights reserved.
             </p>
             <p className="text-xs text-green-100 mt-2">
-              Code2040 Hackathon 2026 – Anonymous Healthcare Bias Tracker
+              Code 2040 Hackathon 2026. Team 15.
             </p>
           </div>
         </div>
@@ -511,6 +634,19 @@ export default function Home() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+
+        @keyframes pulse-once {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+        }
+
+        .animate-pulse-once {
+          animation: pulse-once 1s ease-in-out;
         }
       `}</style>
     </div>
