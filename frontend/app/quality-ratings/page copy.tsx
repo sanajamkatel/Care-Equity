@@ -68,7 +68,9 @@ export default function QualityRatings() {
   useEffect(() => {
     const fetchRatings = async () => {
       try {
-        setLoading(true);
+        setLoading(true); // Show loading spinner
+        
+        // Fetch data from backend API endpoint
         const response = await fetch(`${API_BASE}/ratings`);
         const result = await response.json();
         
@@ -137,30 +139,8 @@ export default function QualityRatings() {
   };
 
   /**
-   * Fetch sentiment for selected hospital (for individual charts)
-   */
-  useEffect(() => {
-    if (selectedHospitalForChart && chartTab === 'individual') {
-      const fetchSelectedSentiment = async () => {
-        try {
-          setLoadingSelectedSentiment(true);
-          const response = await fetch(`${API_BASE}/hospitals/${selectedHospitalForChart}/sentiment`);
-          const result = await response.json();
-          if (result.success && result.data) {
-            setSelectedHospitalSentiment(result.data);
-          }
-        } catch (error) {
-          console.error('Error fetching selected hospital sentiment:', error);
-        } finally {
-          setLoadingSelectedSentiment(false);
-        }
-      };
-      fetchSelectedSentiment();
-    }
-  }, [selectedHospitalForChart, chartTab]);
-
-  /**
-   * Check if hospital has significant disparity (2+ grade difference between Black and White patients)
+   * Helper: Check if hospital has significant disparity
+   * Significant disparity = 2+ grade difference between Black and White patients
    */
   const hasSignificantDisparity = (rating: HospitalRating): boolean => {
     const blackGrade = rating.byGroup?.Black?.grade;
