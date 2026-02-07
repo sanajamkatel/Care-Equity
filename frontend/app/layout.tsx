@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   },
 };
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +33,11 @@ export default function RootLayout({
         className={`${reemKufi.className} antialiased`}
         style={{ fontFamily: reemKufi.style.fontFamily }}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__CARE_EQUITY_API_BASE__ = ${JSON.stringify(API_BASE_URL)};`,
+          }}
+        />
         {children}
         <ToasterComponent />
       </body>
