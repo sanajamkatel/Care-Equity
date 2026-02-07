@@ -26,6 +26,7 @@ export default function FindHospitals() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [hoveredHospital, setHoveredHospital] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Fetch hospitals from backend API
@@ -34,14 +35,19 @@ export default function FindHospitals() {
     const fetchHospitals = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(`${API_BASE}/hospitals`);
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           setHospitals(result.data);
+        } else {
+          setError(result.message || 'Could not load hospitals.');
         }
-      } catch (error) {
-        console.error('Error fetching hospitals:', error);
+      } catch (err) {
+        console.error('Error fetching hospitals:', err);
+        const message = err instanceof Error ? err.message : 'Network error';
+        setError(`Can't reach the server. If you're on mobile, wait 30–60 seconds and tap Retry (backend may be waking up).`);
       } finally {
         setLoading(false);
       }
@@ -49,6 +55,19 @@ export default function FindHospitals() {
 
     fetchHospitals();
   }, []);
+
+  const retryFetch = () => {
+    setError(null);
+    setLoading(true);
+    fetch(`${API_BASE}/hospitals`)
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success && result.data) setHospitals(result.data);
+        else setError(result.message || 'Could not load hospitals.');
+      })
+      .catch(() => setError(`Can't reach the server. Wait a minute and tap Retry.`))
+      .finally(() => setLoading(false));
+  };
 
   /**
    * Generate Google Maps URL showing all 20 specific hospital locations
@@ -131,7 +150,9 @@ export default function FindHospitals() {
                 Find Hospitals Near You
               </h1>
               <p className="text-xl md:text-2xl text-gray-700 mb-8">
-                Explore {hospitals.length} hospitals on an interactive map and get directions
+                {hospitals.length > 0
+                  ? `Explore ${hospitals.length} hospitals on an interactive map and get directions`
+                  : 'Explore hospitals on an interactive map and get directions'}
               </p>
             </div>
           </div>
@@ -140,10 +161,22 @@ export default function FindHospitals() {
         {/* Map and Hospital List Section */}
         <section className="py-8 md:py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {loading ? (
+            {error ? (
+              <div className="text-center py-12 px-4">
+                <p className="text-red-600 mb-4 max-w-md mx-auto">{error}</p>
+                <button
+                  type="button"
+                  onClick={retryFetch}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                 <p className="mt-4 text-gray-600">Loading hospitals...</p>
+                <p className="mt-2 text-sm text-gray-500">On mobile, first load can take 30–60 seconds.</p>
               </div>
             ) : hospitals.length === 0 ? (
               <div className="text-center py-12">
