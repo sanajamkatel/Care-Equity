@@ -22,10 +22,14 @@ const PORT = process.env.PORT || 5001; // Default to 5001 if PORT not set
 
 // CORS (Cross-Origin Resource Sharing) middleware
 // Allows frontend (running on different port) to make API requests
+// CORS (Cross-Origin Resource Sharing) middleware
+// Allows frontend (running on different port/domain) to make API requests
 app.use(cors({
-  origin: '*', // Allow all origins for development (use specific domain in production)
+  origin: true, // Allow all origins - Reflect the request origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false,
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
 
 // JSON body parser - parses JSON request bodies
