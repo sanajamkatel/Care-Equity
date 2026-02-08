@@ -5,7 +5,7 @@ Code2040 Hackathon 2026 – Anonymous Healthcare Bias Tracker
 
 The app is now live and available at:
 
-- **Frontend:** [https://care-equity.vercel.app](https://care-equity.vercel.app)
+- **Frontend:** [(https://care-equity-jtdo.vercel.app/)](https://care-equity.vercel.app)
 
 ### Deployment
 
